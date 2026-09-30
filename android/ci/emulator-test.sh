@@ -29,12 +29,27 @@ shot() {
 T0=$(date +%s)
 adb shell am start -W -n $PKG/.MainActivity
 CODE=000
-for _ in $(seq 1 420); do
+for i in $(seq 1 200); do
     CODE=$(http_code)
     [ "$CODE" = 200 ] && break
+    if [ $((i % 10)) -eq 0 ]; then
+        NODE_PID=$(adb shell pidof libstnode.so 2>/dev/null | tr -d '\r')
+        echo "... $(( $(date +%s) - T0 ))s: http=$CODE node_pid=${NODE_PID:-none} | $(adb logcat -d -s TavernNode:* | tail -1 | cut -c1-160)"
+        # Fail fast when the server clearly died instead of waiting for the timeout.
+        if [ -z "$NODE_PID" ] && adb logcat -d -s TavernNode:* | grep -qE "CANNOT LINK|Server failed|exit code|Error:|not found"; then
+            echo "Server process is gone, stopping early"
+            break
+        fi
+    fi
     sleep 2
 done
 echo "STAT first_start_http=$CODE after $(( $(date +%s) - T0 ))s"
+if [ "$CODE" != 200 ]; then
+    echo "----- server log (TavernNode) -----"; adb logcat -d -s TavernNode:* | tail -120
+    echo "----- app errors -----"; adb logcat -d AndroidRuntime:E ActivityManager:W '*:S' | tail -40
+    shot failure
+    exit 1
+fi
 
 UI=0
 for _ in $(seq 1 120); do
