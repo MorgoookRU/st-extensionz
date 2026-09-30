@@ -6,11 +6,12 @@ Termux builds Node against Android's own libc (Bionic), so DNS, TLS and sockets 
 Android app. Android only extracts files named lib*.so from an APK and only allows executing files
 from the extracted native library directory, so:
   * the node executable becomes libstnode.so;
-  * every dependency is renamed to libnd_<name>.so, and DT_NEEDED / DT_SONAME are patched to match;
-  * the Termux RUNPATH is removed (LD_LIBRARY_PATH points at the native library directory).
+  * versioned libraries are renamed (libssl.so.3 -> libssl3.so) by rewriting names inside the
+    existing string table, so the ELF layout stays intact (patchelf-style edits crash Android's linker);
+  * the Termux RUNPATH is blanked (LD_LIBRARY_PATH points at the native library directory).
 
 Usage: fetch_termux_node.py --abi arm64-v8a --out build-inputs [--package nodejs-lts]
-Requires: readelf (binutils) and patchelf.
+Requires: readelf (binutils).
 """
 import argparse
 import io
@@ -18,6 +19,7 @@ import lzma
 import os
 import re
 import shutil
+import struct
 import subprocess
 import sys
 import tarfile
@@ -131,10 +133,77 @@ def readelf_dynamic(path):
 
 
 def mangle(soname):
+    """libssl.so.3 -> libssl3.so. Always shorter than the original, so it can be written in place."""
+    if re.fullmatch(r'lib.+\.so', soname):
+        return soname
     stem, _, version = soname.partition('.so')
-    stem = re.sub(r'^lib', '', stem)
-    version = re.sub(r'[^0-9A-Za-z]', '', version)
-    return f"libnd_{re.sub(r'[^0-9A-Za-z_]', '_', stem)}{version}.so"
+    return f"{stem}{re.sub(r'[^0-9A-Za-z]', '', version)}.so"
+
+
+def rename_in_dynstr(path, renames):
+    """Renames DT_NEEDED / DT_SONAME / version-need library names inside the existing .dynstr.
+
+    patchelf grows the ELF (moves .dynstr into a new segment), which Android's linker crashes on.
+    Here every new name is not longer than the old one, so strings are overwritten in place and the
+    file layout does not change at all. DT_RUNPATH (Termux prefix) is blanked the same way.
+    """
+    data = bytearray(open(path, 'rb').read())
+    if data[:4] != b'\x7fELF':
+        raise RuntimeError(f'{path} is not an ELF file')
+    is64 = data[4] == 2
+    endian = '<' if data[5] == 1 else '>'
+    if is64:
+        phoff, = struct.unpack_from(endian + 'Q', data, 0x20)
+        phentsize, phnum = struct.unpack_from(endian + 'HH', data, 0x36)
+    else:
+        phoff, = struct.unpack_from(endian + 'I', data, 0x1C)
+        phentsize, phnum = struct.unpack_from(endian + 'HH', data, 0x2A)
+
+    loads, dynamic = [], None
+    for i in range(phnum):
+        base = phoff + i * phentsize
+        if is64:
+            p_type, _flags, p_offset, p_vaddr, _paddr, p_filesz, _memsz, _align = struct.unpack_from(endian + 'IIQQQQQQ', data, base)
+        else:
+            p_type, p_offset, p_vaddr, _paddr, p_filesz, _memsz, _flags, _align = struct.unpack_from(endian + 'IIIIIIII', data, base)
+        if p_type == 1:
+            loads.append((p_vaddr, p_offset, p_filesz))
+        elif p_type == 2:
+            dynamic = (p_offset, p_filesz)
+    if not dynamic:
+        raise RuntimeError(f'{path} has no dynamic section')
+
+    entry = 16 if is64 else 8
+    fmt = endian + ('qQ' if is64 else 'iI')
+    entries = []
+    for offset in range(dynamic[0], dynamic[0] + dynamic[1], entry):
+        tag, value = struct.unpack_from(fmt, data, offset)
+        if tag == 0:
+            break
+        entries.append((tag, value))
+    tags = dict(entries)
+    strtab_vaddr, strsz = tags.get(5), tags.get(10)
+    strtab = next((off + strtab_vaddr - va for va, off, size in loads if va <= strtab_vaddr < va + size), None)
+    if strtab is None:
+        raise RuntimeError(f'{path}: cannot locate .dynstr')
+
+    table = data[strtab:strtab + strsz]
+    for old, new in renames.items():
+        if old == new:
+            continue
+        if len(new) > len(old):
+            raise RuntimeError(f'{new} is longer than {old}')
+        needle = old.encode() + b'\0'
+        start = 0
+        while (index := table.find(needle, start)) >= 0:
+            if index == 0 or table[index - 1] == 0:  # a whole string, not the tail of another one
+                table[index:index + len(needle)] = new.encode() + b'\0' * (len(old) - len(new) + 1)
+            start = index + 1
+    for tag, value in entries:
+        if tag in (15, 29) and value < len(table):  # DT_RPATH, DT_RUNPATH
+            table[value] = 0
+    data[strtab:strtab + strsz] = table
+    open(path, 'wb').write(data)
 
 
 def main():
@@ -190,15 +259,12 @@ def main():
     total += os.path.getsize(node_target)
 
     for path in [node_target] + [os.path.join(out_libs, renames[n]) for n in libs]:
-        needed, soname = readelf_dynamic(path)
-        command = ['patchelf', '--remove-rpath']
-        for name in needed:
-            if name in renames:
-                command += ['--replace-needed', name, renames[name]]
-        if soname and soname in renames:
-            command += ['--set-soname', renames[soname]]
-        subprocess.run(command + [path], check=True)
+        rename_in_dynstr(path, renames)
         os.chmod(path, 0o755)
+        needed, soname = readelf_dynamic(path)
+        missing = [n for n in needed if n not in SYSTEM_LIBS and n not in renames.values()]
+        if missing:
+            raise RuntimeError(f'{os.path.basename(path)} still needs {missing}')
 
     cert = os.path.join(usr, 'etc', 'tls', 'cert.pem')
     if os.path.exists(cert):
