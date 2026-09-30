@@ -54,6 +54,8 @@ public class FolderActivity extends Activity {
     private static final int REQUEST_IMPORT = 20;
 
     private File root;
+    /** The folder the web UI asked for: the system Back button returns to SillyTavern from here. */
+    private File start;
     private File current;
     private TextView titleView;
     private TextView pathView;
@@ -67,16 +69,28 @@ public class FolderActivity extends Activity {
         super.onCreate(savedInstanceState);
         root = Installer.userDir(this);
         String relative = getIntent().getStringExtra(EXTRA_PATH);
-        File start = relative == null || relative.isEmpty() ? root : new File(root, relative);
+        File requested = relative == null || relative.isEmpty() ? root : new File(root, relative);
         //noinspection ResultOfMethodCallIgnored
-        start.mkdirs();
-        current = isInside(start) ? start : root;
+        requested.mkdirs();
+        start = isInside(requested) ? requested : root;
+        current = start;
         setContentView(buildUi());
         refresh();
     }
 
+    /** System Back: up to the folder the UI opened, then back to SillyTavern. */
     @Override
     public void onBackPressed() {
+        if (!current.equals(start) && current.getParentFile() != null) {
+            current = current.getParentFile();
+            refresh();
+        } else {
+            finishWithResult();
+        }
+    }
+
+    /** The ← button: one folder up, all the way to the SillyTavern data root. */
+    private void goUp() {
         if (!current.equals(root) && current.getParentFile() != null) {
             current = current.getParentFile();
             refresh();
@@ -141,7 +155,7 @@ public class FolderActivity extends Activity {
         header.setGravity(Gravity.CENTER_VERTICAL);
         Button back = new Button(this);
         back.setText("←");
-        back.setOnClickListener(v -> onBackPressed());
+        back.setOnClickListener(v -> goUp());
         header.addView(back, new LinearLayout.LayoutParams(dp(52), ViewGroup.LayoutParams.WRAP_CONTENT));
         LinearLayout titles = new LinearLayout(this);
         titles.setOrientation(LinearLayout.VERTICAL);

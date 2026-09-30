@@ -89,11 +89,17 @@ cdp 'document.querySelector(".popup-button-ok, .popup-button-cancel")?.click(); 
 # ---- is SillyTavern listed in the system file picker's side menu?
 adb shell am start -a android.intent.action.GET_CONTENT -t '*/*' -c android.intent.category.OPENABLE >/dev/null
 sleep 5
+PICKER=$(adb shell dumpsys activity activities | grep -m1 -E 'topResumedActivity|mResumedActivity' | sed 's/^ *//' | cut -c1-140)
+echo "STAT picker=$PICKER"
 adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
 MENU=$(adb shell cat /sdcard/ui.xml | grep -oE 'content-desc="Show roots"[^>]*bounds="\[[0-9]+,[0-9]+\]' | grep -oE '[0-9]+,[0-9]+\]$' | tr -d ']' | tr ',' ' ')
 [ -n "$MENU" ] && adb shell input tap $MENU && sleep 2
 adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
-echo "STAT files_sidebar_has_sillytavern=$(adb shell cat /sdcard/ui.xml | grep -c 'text="SillyTavern"')"
+if echo "$PICKER" | grep -q documentsui; then
+    echo "STAT files_sidebar_has_sillytavern=$(adb shell cat /sdcard/ui.xml | grep -c 'text="SillyTavern"')"
+else
+    echo "STAT files_sidebar_has_sillytavern=unknown (the picker did not open)"
+fi
 shot files-sidebar
 adb shell input keyevent KEYCODE_BACK
 adb shell input keyevent KEYCODE_BACK
