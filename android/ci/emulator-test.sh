@@ -66,13 +66,22 @@ adb shell dumpsys meminfo $PKG | grep -E "TOTAL PSS|TOTAL RSS|Native Heap|Java H
 echo "STAT processes (RSS in KB):"
 adb shell "ps -A -o RSS,NAME" | grep -E "libstnode|$PKG|webview|sandboxed" || true
 
-# ---- SillyTavern folder in the system file manager
-adb shell am start -a android.intent.action.VIEW \
-    -d "content://$PKG.documents/document/%2Fdata%2Fuser%2F0%2F$PKG%2Ffiles%2Fdata%2Fdefault-user%2Fcharacters" \
-    -t vnd.android.document/directory >/dev/null 2>&1
-sleep 6
-echo "STAT folder_activity=$(adb shell dumpsys activity activities | grep -m1 -E 'topResumedActivity|mResumedActivity' | sed 's/^ *//')"
-shot folder
+# ---- SillyTavern folder in the system file manager: try every way the app uses
+DOC="content://$PKG.documents/document/%2Fdata%2Fuser%2F0%2F$PKG%2Ffiles%2Fdata%2Fdefault-user%2Fcharacters"
+ROOT="content://$PKG.documents/root/sillytavern"
+try_folder() {
+    local name=$1; shift
+    adb shell am force-stop com.google.android.documentsui
+    adb logcat -c
+    adb shell am start "$@" >/dev/null 2>&1
+    sleep 7
+    echo "STAT folder_$name=$(adb shell dumpsys activity activities | grep -m1 -E 'topResumedActivity|mResumedActivity' | sed 's/^ *//' | cut -c1-140)"
+    adb logcat -d | grep -iE "documentsui|DocumentStack|findDocumentPath|$PKG.documents|FileNotFound" | grep -vE "ActivityTaskManager: START|dumpsys" | tail -12 | sed "s/^/  [$name] /"
+    shot "folder-$name"
+}
+try_folder doc -a android.intent.action.VIEW -d "$DOC" -t vnd.android.document/directory
+try_folder root -a android.intent.action.VIEW -d "$ROOT" -t vnd.android.document/root
+try_folder browse -a android.provider.action.BROWSE -d "$ROOT"
 adb shell am start -W -n $PKG/.MainActivity >/dev/null
 
 # ---- warm start: the files are already unpacked and the frontend is cached
