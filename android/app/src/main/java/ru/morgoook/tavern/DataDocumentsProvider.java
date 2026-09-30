@@ -4,6 +4,7 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
+import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
@@ -12,6 +13,7 @@ import android.webkit.MimeTypeMap;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.Locale;
 
 /**
@@ -127,6 +129,19 @@ public class DataDocumentsProvider extends DocumentsProvider {
     @Override
     public boolean isChildDocument(String parentDocumentId, String documentId) {
         return documentId.startsWith(parentDocumentId + File.separator);
+    }
+
+    /** Lets the Files app open a sub-folder directly (it builds the breadcrumb from this path). */
+    @Override
+    public DocumentsContract.Path findDocumentPath(String parentDocumentId, String childDocumentId) throws FileNotFoundException {
+        String start = parentDocumentId != null ? fileFor(parentDocumentId).getAbsolutePath() : baseDir().getAbsolutePath();
+        LinkedList<String> path = new LinkedList<>();
+        for (File current = fileFor(childDocumentId); current != null; current = current.getParentFile()) {
+            path.addFirst(current.getAbsolutePath());
+            if (current.getAbsolutePath().equals(start)) break;
+        }
+        if (!path.getFirst().equals(start)) throw new FileNotFoundException(childDocumentId + " is not inside " + start);
+        return new DocumentsContract.Path(parentDocumentId == null ? ROOT_ID : null, path);
     }
 
     @Override
