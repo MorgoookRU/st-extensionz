@@ -20,4 +20,18 @@
     <string name="subtitle">Unofficial Android build · SillyTavern runs on this phone</string>
     <string name="documents_summary">Characters, chats, backgrounds</string>
     <string name="folder_failed">No file manager can open the folder</string>
+    <string name="folder_import">Import files</string>
+    <string name="folder_new">New folder</string>
+    <string name="folder_system">Open in Files</string>
+    <string name="folder_empty">The folder is empty</string>
+    <string name="folder_hint">Tap a file to open it, long-press to share, rename or delete. SillyTavern picks up the changes when you go back.</string>
+    <string name="folder_no_app">No app can open this file</string>
+    <string name="folder_share">Share</string>
+    <string name="folder_rename">Rename</string>
+    <string name="folder_delete">Delete</string>
+    <string name="folder_share_dir">Folders cannot be shared, open it and share the files</string>
+    <string name="folder_failed_action">Could not do that</string>
+    <string name="folder_delete_confirm">Delete \"%1$s\"?</string>
+    <string name="folder_system_hint">If the Files app opened another folder, choose SillyTavern in its side menu</string>
+    <string name="folder_imported">Imported files: %1$d</string>
 </resources>

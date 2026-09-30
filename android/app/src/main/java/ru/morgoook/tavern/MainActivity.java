@@ -38,13 +38,17 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class MainActivity extends Activity implements ServerStatus.Listener {
     private static final String URL = "http://127.0.0.1:" + NodeService.PORT + "/";
     private static final String WEB_TAG = "TavernWeb";
     private static final int REQUEST_FILES = 10;
+    private static final int REQUEST_FOLDER = 11;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private FrameLayout root;
@@ -273,9 +277,24 @@ public class MainActivity extends Activity implements ServerStatus.Listener {
         startPolling();
     }
 
+    /** Opens the built-in file manager at a folder of the SillyTavern data (called by AppBridge). */
+    void openFolder(String relative) {
+        startActivityForResult(new Intent(this, FolderActivity.class).putExtra(FolderActivity.EXTRA_PATH, relative), REQUEST_FOLDER);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_FOLDER) {
+            if (resultCode == FolderActivity.RESULT_CHANGED && data != null && pageLoaded) {
+                // Let the web UI refresh the lists that show the changed folders (Extensionz "Folders").
+                JSONArray folders = new JSONArray();
+                ArrayList<String> changed = data.getStringArrayListExtra(FolderActivity.EXTRA_CHANGED);
+                if (changed != null) for (String folder : changed) folders.put(folder);
+                web.evaluateJavascript("window.dispatchEvent(new CustomEvent('tavernapp:files-changed',{detail:{folders:" + folders + "}}))", null);
+            }
+            return;
+        }
         if (requestCode != REQUEST_FILES || fileCallback == null) return;
         Uri[] result = null;
         if (resultCode == RESULT_OK && data != null) {

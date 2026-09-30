@@ -20,4 +20,18 @@
     <string name="subtitle">Неофициальная сборка для Android · таверна работает прямо на телефоне</string>
     <string name="documents_summary">Персонажи, чаты, фоны</string>
     <string name="folder_failed">Нет файлового менеджера, который может открыть папку</string>
+    <string name="folder_import">Импорт файлов</string>
+    <string name="folder_new">Новая папка</string>
+    <string name="folder_system">Открыть в «Файлах»</string>
+    <string name="folder_empty">Папка пуста</string>
+    <string name="folder_hint">Нажмите на файл, чтобы открыть его; долгое нажатие: поделиться, переименовать, удалить. Таверна подхватит изменения, когда вы вернётесь.</string>
+    <string name="folder_no_app">Нет приложения, которое откроет этот файл</string>
+    <string name="folder_share">Поделиться</string>
+    <string name="folder_rename">Переименовать</string>
+    <string name="folder_delete">Удалить</string>
+    <string name="folder_share_dir">Папкой поделиться нельзя: откройте её и отправьте файлы</string>
+    <string name="folder_failed_action">Не получилось</string>
+    <string name="folder_delete_confirm">Удалить «%1$s»?</string>
+    <string name="folder_system_hint">Если «Файлы» открыли другую папку, выберите SillyTavern в боковом меню</string>
+    <string name="folder_imported">Импортировано файлов: %1$d</string>
 </resources>

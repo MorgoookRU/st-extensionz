@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Installs the x86_64 APK on the CI emulator, starts it and checks that the embedded SillyTavern
-# server answers, the web UI loads (Extensionz logs its version to the console) and the SillyTavern
-# folder opens in the system file manager. Prints STAT lines and a small screenshot as base64.
+# server answers, the web UI loads (Extensionz logs its version to the console) and the "open folder"
+# button leads to the built-in file manager. Prints STAT lines and a small screenshot as base64.
 set -uo pipefail
 
 PKG=ru.morgoook.tavern
@@ -66,22 +66,37 @@ adb shell dumpsys meminfo $PKG | grep -E "TOTAL PSS|TOTAL RSS|Native Heap|Java H
 echo "STAT processes (RSS in KB):"
 adb shell "ps -A -o RSS,NAME" | grep -E "libstnode|$PKG|webview|sandboxed" || true
 
-# ---- SillyTavern folder in the system file manager: try every way the app uses
-DOC="content://$PKG.documents/document/%2Fdata%2Fuser%2F0%2F$PKG%2Ffiles%2Fdata%2Fdefault-user%2Fcharacters"
-ROOT="content://$PKG.documents/root/sillytavern"
-try_folder() {
-    local name=$1; shift
-    adb shell am force-stop com.google.android.documentsui
-    adb logcat -c
-    adb shell am start "$@" >/dev/null 2>&1
-    sleep 7
-    echo "STAT folder_$name=$(adb shell dumpsys activity activities | grep -m1 -E 'topResumedActivity|mResumedActivity' | sed 's/^ *//' | cut -c1-140)"
-    adb logcat -d | grep -iE "documentsui|DocumentStack|findDocumentPath|$PKG.documents|FileNotFound" | grep -vE "ActivityTaskManager: START|dumpsys" | tail -12 | sed "s/^/  [$name] /"
-    shot "folder-$name"
-}
-try_folder doc -a android.intent.action.VIEW -d "$DOC" -t vnd.android.document/directory
-try_folder root -a android.intent.action.VIEW -d "$ROOT" -t vnd.android.document/root
-try_folder browse -a android.provider.action.BROWSE -d "$ROOT"
+# ---- "Open folder" button in the web UI -> built-in file manager (FolderActivity)
+WEB_PID=$(adb shell pidof $PKG | tr -d '\r')
+adb forward tcp:9222 localabstract:webview_devtools_remote_$WEB_PID
+cdp() { node android/ci/cdp.mjs 9222 "$1"; }
+echo "STAT folder_buttons=$(cdp 'document.querySelectorAll(".stx-folder-btn").length')"
+cdp 'document.querySelector(".stx-folder-btn[data-folder=characters]").click(); "clicked"'
+sleep 4
+FOCUS=$(adb shell dumpsys activity activities | grep -m1 -E 'topResumedActivity|mResumedActivity' | sed 's/^ *//' | cut -c1-140)
+echo "STAT folder_activity=$FOCUS"
+FOLDER_OK=0
+echo "$FOCUS" | grep -q FolderActivity && FOLDER_OK=1
+shot folder-characters
+adb shell input keyevent KEYCODE_BACK
+sleep 3
+echo "STAT folder_back=$(adb shell dumpsys activity activities | grep -m1 -E 'topResumedActivity|mResumedActivity' | sed 's/^ *//' | cut -c1-140)"
+cdp 'SillyTavern.getContext().executeSlashCommandsWithOptions("/folder"); "popup"'
+sleep 3
+shot folders-popup
+cdp 'document.querySelector(".popup-button-ok, .popup-button-cancel")?.click(); "closed"'
+
+# ---- is SillyTavern listed in the system file picker's side menu?
+adb shell am start -a android.intent.action.GET_CONTENT -t '*/*' -c android.intent.category.OPENABLE >/dev/null
+sleep 5
+adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
+MENU=$(adb shell cat /sdcard/ui.xml | grep -oE 'content-desc="Show roots"[^>]*bounds="\[[0-9]+,[0-9]+\]' | grep -oE '[0-9]+,[0-9]+\]$' | tr -d ']' | tr ',' ' ')
+[ -n "$MENU" ] && adb shell input tap $MENU && sleep 2
+adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
+echo "STAT files_sidebar_has_sillytavern=$(adb shell cat /sdcard/ui.xml | grep -c 'text="SillyTavern"')"
+shot files-sidebar
+adb shell input keyevent KEYCODE_BACK
+adb shell input keyevent KEYCODE_BACK
 adb shell am start -W -n $PKG/.MainActivity >/dev/null
 
 # ---- warm start: the files are already unpacked and the frontend is cached
@@ -106,4 +121,4 @@ adb logcat -d -s TavernWeb:* | grep -vE "favicon" | tail -40
 echo "----- crashes -----"
 adb logcat -d -b crash | tail -40
 
-[ "$CODE" = 200 ] && [ "$UI" -ge 1 ] && [ "$CODE2" = 200 ]
+[ "$CODE" = 200 ] && [ "$UI" -ge 1 ] && [ "$CODE2" = 200 ] && [ "$FOLDER_OK" = 1 ]

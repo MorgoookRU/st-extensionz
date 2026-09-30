@@ -1,6 +1,6 @@
 // Folders: quick access to SillyTavern's data folders from the interface.
-// Inside the Android app (window.TavernApp) a folder opens right in the system file manager;
-// elsewhere the module shows the folder's path with a copy button.
+// Inside the Android app (window.TavernApp) a folder opens in the app's built-in file manager and the
+// changed lists are refreshed on return; elsewhere the module shows the folder's path with a copy button.
 
 import { t } from '../core/i18n.js';
 import { moduleSettings } from '../core/settings.js';
@@ -142,10 +142,42 @@ function syncPanelButtons() {
     else removePanelButtons();
 }
 
+// ------------------------------------------------------------------ changes made in the Android file manager
+
+// Refreshes the SillyTavern lists that show a changed folder; anything else needs a page reload.
+const REFRESHERS = {
+    characters: () => ctx().getCharacters(),
+    worlds: () => ctx().updateWorldInfoList(),
+    backgrounds: async () => (await import('/scripts/backgrounds.js')).getBackgrounds(),
+    'User Avatars': async () => (await import('/scripts/personas.js')).getUserAvatars(true),
+};
+const NO_REFRESH_NEEDED = new Set(['chats', 'group chats', 'user', 'backups']);
+
+async function onFilesChanged(event) {
+    const folders = event.detail?.folders ?? [];
+    let needsReload = false;
+    for (const folder of folders) {
+        if (NO_REFRESH_NEEDED.has(folder)) continue;
+        try {
+            if (REFRESHERS[folder]) await REFRESHERS[folder]();
+            else needsReload = true;
+        } catch (error) {
+            console.warn('[Extensionz] folders: refresh failed', folder, error);
+            needsReload = true;
+        }
+    }
+    if (needsReload) {
+        toastr.info(t('folders.reloadHint'), '', { timeOut: 8000, onclick: () => location.reload() });
+    } else if (folders.length) {
+        toastr.success(t('folders.refreshed'), '', { timeOut: 2500 });
+    }
+}
+
 // ------------------------------------------------------------------ module API
 
 function init() {
     s = moduleSettings(ID);
+    window.addEventListener('tavernapp:files-changed', event => onFilesChanged(event));
     $(document).on('click', '.stx-folder-btn', function (event) {
         event.preventDefault();
         event.stopPropagation();
