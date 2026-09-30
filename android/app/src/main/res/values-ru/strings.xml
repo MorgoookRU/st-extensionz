@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SillyTavern</string>
+    <string name="notif_channel">Сервер SillyTavern</string>
+    <string name="notif_starting">Запуск сервера…</string>
+    <string name="notif_running">Сервер работает</string>
+    <string name="notif_stop">Остановить</string>
+    <string name="status_installing">Распаковка SillyTavern… %1$d%%</string>
+    <string name="status_starting">Запуск сервера… Самый первый запуск собирает интерфейс и занимает около минуты.</string>
+    <string name="status_ready">Сервер работает, открываю интерфейс…</string>
+    <string name="status_failed">Ошибка сервера: %1$s</string>
+    <string name="status_exited">Сервер остановился (код %1$d)</string>
+    <string name="status_stopped">Сервер остановлен</string>
+    <string name="status_disconnected">Связь с сервером потеряна, переподключаюсь…</string>
+    <string name="btn_restart">Перезапустить сервер</string>
+    <string name="btn_stop">Остановить сервер</string>
+    <string name="btn_battery">Разрешить работу в фоне</string>
+    <string name="saved_to">Сохранено: %1$s</string>
+    <string name="save_failed">Не удалось сохранить файл: %1$s</string>
+    <string name="subtitle">Неофициальная сборка для Android · таверна работает прямо на телефоне</string>
+    <string name="documents_summary">Персонажи, чаты, фоны</string>
+    <string name="folder_failed">Нет файлового менеджера, который может открыть папку</string>
+</resources>

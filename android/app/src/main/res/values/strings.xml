@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SillyTavern</string>
+    <string name="notif_channel">SillyTavern server</string>
+    <string name="notif_starting">Starting the server…</string>
+    <string name="notif_running">Server is running</string>
+    <string name="notif_stop">Stop</string>
+    <string name="status_installing">Unpacking SillyTavern… %1$d%%</string>
+    <string name="status_starting">Starting the server… The very first start builds the interface and takes a minute.</string>
+    <string name="status_ready">Server is running, opening the interface…</string>
+    <string name="status_failed">Server failed: %1$s</string>
+    <string name="status_exited">Server stopped (exit code %1$d)</string>
+    <string name="status_stopped">Server stopped</string>
+    <string name="status_disconnected">Lost connection to the server, reconnecting…</string>
+    <string name="btn_restart">Restart server</string>
+    <string name="btn_stop">Stop server</string>
+    <string name="btn_battery">Allow running in background</string>
+    <string name="saved_to">Saved: %1$s</string>
+    <string name="save_failed">Could not save the file: %1$s</string>
+    <string name="subtitle">Unofficial Android build · SillyTavern runs on this phone</string>
+    <string name="documents_summary">Characters, chats, backgrounds</string>
+    <string name="folder_failed">No file manager can open the folder</string>
+</resources>

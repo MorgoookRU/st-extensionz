@@ -25,7 +25,6 @@ const CHANGES = [
     [['thumbnails', 'quality'], 85, 'smaller thumbnails, invisible at avatar size'],
     [['performance', 'lazyLoadCharacters'], true, 'load full character cards only when opened'],
     [['performance', 'memoryCacheCapacity'], '32mb', 'smaller in-memory character cache (disk cache stays on)'],
-    [['skipContentCheck'], true, 'skip the default-content check on every start'],
     [['extensions', 'autoUpdate'], false, 'no git fetch for every extension on each page load (update manually)'],
     [['extensions', 'models', 'autoDownload'], false, 'never download local AI models (hundreds of MB, heavy CPU)'],
 ];

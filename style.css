@@ -765,3 +765,51 @@ body.stx-perf-noshadow *::after {
     text-align: right;
     font-weight: 600;
 }
+
+/* ------------------------------------------------------------ folders */
+
+.stx-folders {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 62vh;
+    overflow-y: auto;
+}
+
+.stx-folder-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--SmartThemeBorderColor);
+    background: var(--black30a, rgba(0, 0, 0, 0.3));
+}
+
+.stx-folder-icon {
+    font-size: 1.2em;
+    opacity: 0.85;
+    color: var(--SmartThemeQuoteColor);
+}
+
+.stx-folder-name {
+    font-weight: 600;
+}
+
+.stx-folder-path {
+    display: block;
+    opacity: 0.6;
+    font-family: var(--monoFontFamily, monospace);
+    font-size: 0.78em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stx-folder-root {
+    font-family: var(--monoFontFamily, monospace);
+    font-size: 0.85em;
+    opacity: 0.8;
+    word-break: break-all;
+}

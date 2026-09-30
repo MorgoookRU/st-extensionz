@@ -1,0 +1,82 @@
+plugins {
+    id 'com.android.application'
+}
+
+def buildNumber = (project.findProperty('versionCode') ?: '1') as Integer
+def stVersion = project.findProperty('stVersion') ?: 'dev'
+
+android {
+    namespace 'ru.morgoook.tavern'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'ru.morgoook.tavern'
+        minSdk 26
+        targetSdk 34
+        versionCode buildNumber
+        versionName "1.0.${buildNumber} (SillyTavern ${stVersion})"
+    }
+
+    signingConfigs {
+        release {
+            def store = System.getenv('STORE_FILE')
+            if (store) {
+                storeFile file(store)
+                storePassword System.getenv('STORE_PASSWORD')
+                keyAlias System.getenv('KEY_ALIAS') ?: 'tavern'
+                keyPassword System.getenv('KEY_PASSWORD') ?: System.getenv('STORE_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig System.getenv('STORE_FILE') ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    // One APK per ABI: arm64-v8a for phones, x86_64 for the emulator test in CI.
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'arm64-v8a', 'x86_64'
+            universalApk false
+        }
+    }
+
+    packaging {
+        jniLibs {
+            // extractNativeLibs=true: Android can only execute files from the extracted native library dir.
+            useLegacyPackaging true
+            // Binaries come prebuilt and patched; do not let the build strip them.
+            keepDebugSymbols += ['**/*.so']
+        }
+    }
+
+    androidResources {
+        noCompress 'zip'
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['../build-inputs/jniLibs']
+            assets.srcDirs = ['../build-inputs/assets']
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}

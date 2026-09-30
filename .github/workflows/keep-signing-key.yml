@@ -1,0 +1,21 @@
+name: Keep APK signing key
+
+# Actions caches are evicted after 7 days without access. Touching the signing key weekly keeps it,
+# so future APK builds can update the installed app instead of requiring a reinstall.
+on:
+  schedule:
+    - cron: '23 5 * * 1,4'
+  workflow_dispatch:
+
+jobs:
+  touch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Restore signing key
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: android/keystore.jks
+          key: apk-signing-key-v1
+      - name: Report
+        run: echo "Signing key present: ${{ steps.cache.outputs.cache-hit == 'true' }}"
