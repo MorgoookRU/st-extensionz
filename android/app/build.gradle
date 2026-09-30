@@ -51,7 +51,7 @@ android {
             // extractNativeLibs=true: Android can only execute files from the extracted native library dir.
             useLegacyPackaging true
             // Binaries come prebuilt and patched; do not let the build strip them.
-            keepDebugSymbols += ['**/*.so']
+            keepDebugSymbols.add('**/*.so')
         }
     }
 
