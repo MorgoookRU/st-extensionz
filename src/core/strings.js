@@ -1,5 +1,6 @@
 export const STRINGS = {
     en: {
+        'common.close': 'Close',
         'common.delete': 'Delete',
         'common.resetDefaults': 'Reset to defaults',
 
@@ -11,7 +12,7 @@ export const STRINGS = {
         // Panic
         'panic.title': 'Dad Came (panic mode)',
         'panic.desc': 'One tap hides character pictures and backgrounds and blacks out "interesting" sentences like a declassified document. Tap again to restore everything. Chat data is never modified.',
-        'panic.menuOn': 'Dad Came!',
+        'panic.menuOn': 'Dad Came',
         'panic.menuOff': 'All clear — restore',
         'panic.toggleNow': 'Toggle now',
         'panic.sectionTriggers': 'How to trigger',
@@ -44,7 +45,7 @@ export const STRINGS = {
         'panic.keywordsCount': 'Active entries: {count}',
         'panic.keywordsErrors': 'Active entries: {count}. Invalid: {errors}',
         'panic.smartForms': 'Match word forms automatically',
-        'panic.smartFormsHint': 'поцелуй also finds поцелуя / поцелуями, kiss finds kisses / kissed.',
+        'panic.smartFormsHint': 'kiss also finds kisses / kissed / kissing (works for Russian words too).',
         'panic.redactReasoning': 'Also black out reasoning (thinking) blocks',
         'panic.redactNames': 'Black out character and persona names',
         'panic.redactNamesHint': 'Names in the text and in message headers become black bars too.',
@@ -125,7 +126,7 @@ export const STRINGS = {
 
         // Slop radar
         'slop.title': 'Cliché radar',
-        'slop.desc': 'Underlines worn-out AI phrases ("shivers down her spine", "barely above a whisper", "мурашки по коже"…) in replies, counts them per chat and can ask the model to avoid the ones it overuses.',
+        'slop.desc': 'Underlines worn-out AI phrases ("shivers down her spine", "barely above a whisper"…, English and Russian) in replies, counts them per chat and can ask the model to avoid the ones it overuses.',
         'slop.menu': 'Cliché radar',
         'slop.markTitle': 'Cliché',
         'slop.highlight': 'Underline clichés in replies',
@@ -279,6 +280,7 @@ export const STRINGS = {
     },
 
     ru: {
+        'common.close': 'Закрыть',
         'common.delete': 'Удалить',
         'common.resetDefaults': 'Сбросить по умолчанию',
 
@@ -290,7 +292,7 @@ export const STRINGS = {
         // Panic
         'panic.title': 'Папа пришёл (режим паники)',
         'panic.desc': 'Одно нажатие — и картинки персонажей и фоны исчезают, а «интересные» предложения закрываются чёрными полосами, как в рассекреченных документах. Повторное нажатие возвращает всё как было. Сам чат не изменяется.',
-        'panic.menuOn': 'Папа пришёл!',
+        'panic.menuOn': 'Папа пришёл',
         'panic.menuOff': 'Отбой — вернуть всё',
         'panic.toggleNow': 'Переключить сейчас',
         'panic.sectionTriggers': 'Как включать',

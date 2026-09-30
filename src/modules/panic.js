@@ -13,7 +13,7 @@ import * as ui from '../core/ui.js';
 const ID = 'panic';
 const STATE_KEY = 'stx:panic';
 
-const DEFAULT_KEYWORDS = `# Русский: романтика и 18+
+const DEFAULT_KEYWORDS = `# Russian: romance and 18+
 поцел*
 целов*
 облиз*
@@ -50,13 +50,13 @@ const DEFAULT_KEYWORDS = `# Русский: романтика и 18+
 влагалищ*
 клитор*
 постел*
-# Насилие
+# Russian: violence
 "кровь", "крови", "кровью"
 окровавл*
 убий*
 пытк*
 "труп", "трупа", "трупу", "трупом", "трупы", "трупов"
-# Мат
+# Russian: swearing
 хуй, хуе*, хуё*, хуя*
 пизд*
 ебат*, ебал*, ебан*, ёбан*, выеб*, заеб*

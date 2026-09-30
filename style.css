@@ -250,17 +250,42 @@ body.stx-p-names #rm_button_selected_ch h2 {
 
 /* ------------------------------------------------------------ panic: pictures */
 
+/* Pictures turn into solid bars, like the redacted text. The image is moved out of its own box, so
+   the layout stays exactly the same, and the box is painted with the bar color. */
 body.stx-p-img:not(.stx-p-blur) img:not(.stx-keep),
 body.stx-p-img:not(.stx-p-blur) video:not(.stx-keep) {
-    opacity: 0 !important;
+    object-position: -99999px -99999px !important;
+    background: var(--stx-bar, #000) !important;
+    border-radius: 2px !important;
+    box-shadow: none !important;
+    filter: none !important;
 }
 
 body.stx-p-img:not(.stx-p-blur) .avatar,
 body.stx-p-img:not(.stx-p-blur) .mes_img_container,
 body.stx-p-img:not(.stx-p-blur) .zoomed_avatar_container {
-    background:
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%239aa0a6' d='M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-4.4 0-9 2.2-9 5v3h18v-3c0-2.8-4.6-5-9-5z'/%3E%3C/svg%3E") center / 58% no-repeat,
-        linear-gradient(135deg, #454a52, #2a2d33) !important;
+    background: var(--stx-bar, #000) !important;
+    border-radius: 2px !important;
+    box-shadow: none !important;
+}
+
+/* Themes that paint the character as a message background (Moonlit Echoes: Echo and Whisper styles)
+   read it from CSS variables on .mes; replace them with a flat bar and drop the soft fade mask. */
+body.stx-p-img:not(.stx-p-blur) #chat .mes.mes {
+    --mes-avatar-url: linear-gradient(var(--stx-bar, #000), var(--stx-bar, #000)) !important;
+    --mes-avatar-original-url: linear-gradient(var(--stx-bar, #000), var(--stx-bar, #000)) !important;
+    --mes-avatar-thumb-url: linear-gradient(var(--stx-bar, #000), var(--stx-bar, #000)) !important;
+}
+
+body.stx-p-img:not(.stx-p-blur) #chat .mes[style*="--mes-avatar"]::before,
+body.stx-p-img:not(.stx-p-blur) #chat .mes[style*="--mes-avatar"] .mes_text::before {
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+}
+
+body.stx-p-img.stx-p-blur #chat .mes[style*="--mes-avatar"]::before,
+body.stx-p-img.stx-p-blur #chat .mes[style*="--mes-avatar"] .mes_text::before {
+    filter: blur(18px) grayscale(1) brightness(0.8) !important;
 }
 
 body.stx-p-img:not(.stx-p-blur) .bg_example,

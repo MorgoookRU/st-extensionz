@@ -2,6 +2,8 @@
 // Everything goes through SillyTavern.getContext() so the suite does not depend
 // on internal file paths that change between releases.
 
+import { t } from './i18n.js';
+
 export const ctx = () => SillyTavern.getContext();
 
 export const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -181,10 +183,13 @@ export function openPopup(content, options = {}) {
         wide: true,
         allowVerticalScrolling: true,
         leftAlign: true,
-        okButton: false,
+        // A visible way to close: phones have no Esc key.
+        okButton: t('common.close'),
         cancelButton: false,
         ...options,
     });
+    // The corner ✕ that SillyTavern shows only for image popups; it closes like Esc.
+    if (popup.closeButton) popup.closeButton.style.display = 'block';
     popup.show();
     return popup;
 }

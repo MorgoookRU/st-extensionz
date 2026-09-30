@@ -50,7 +50,7 @@ musky
 /(?:predatory|wolfish) (?:grin|smile)/
 /(?:voice|tone) (?:dripping|laced|thick) with/
 /(?:heart|pulse) (?:hammering|pounding|racing)/
-# Русский
+# Russian
 /(?:мурашк\\p{L}*|холодок|дрожь) (?:пробежал\\p{L}*|побежал\\p{L}*|прошл\\p{L}*) (?:по|вдоль) (?:спине|коже|позвоночнику)/
 /мурашк\\p{L}* по (?:коже|спине)/
 /(?:едва|чуть) (?:громче|слышнее) (?:шёпота|шепота)/
