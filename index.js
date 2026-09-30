@@ -10,9 +10,10 @@ import chatNavigator from './src/modules/navigator.js';
 import drafts from './src/modules/drafts.js';
 import slop from './src/modules/slop.js';
 import notifier from './src/modules/notifier.js';
+import perf from './src/modules/perf.js';
 
-const VERSION = '1.0.0';
-const MODULES = [panic, chatNavigator, drafts, slop, notifier].sort((a, b) => a.order - b.order);
+const VERSION = '1.1.0';
+const MODULES = [panic, chatNavigator, drafts, slop, notifier, perf].sort((a, b) => a.order - b.order);
 
 MODULES.forEach(module => registerDefaults(module.id, module.defaults));
 

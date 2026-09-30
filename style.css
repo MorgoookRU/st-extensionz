@@ -651,3 +651,117 @@ body.stx-panic .stx-mark.stx-slop {
         justify-content: flex-start;
     }
 }
+
+/* ------------------------------------------------------------ performance */
+
+/* Off-screen messages are skipped by the renderer; the remembered size keeps scrolling stable. */
+body.stx-perf-cv #chat > .mes:not(.last_mes) {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto var(--stx-mes-height, 260px);
+}
+
+#bg1.stx-bg-opt {
+    background-image: var(--stx-bg-opt) !important;
+}
+
+body.stx-perf-noblur *,
+body.stx-perf-noblur *::before,
+body.stx-perf-noblur *::after {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+
+body.stx-perf-noanim *,
+body.stx-perf-noanim *::before,
+body.stx-perf-noanim *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+}
+
+body.stx-perf-noshadow *,
+body.stx-perf-noshadow *::before,
+body.stx-perf-noshadow *::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+.stx-tweaks {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 4px 0;
+}
+
+.stx-tweak {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--SmartThemeBorderColor);
+    background: var(--black30a, rgba(0, 0, 0, 0.3));
+}
+
+.stx-tweak-name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.stx-tweak-values {
+    opacity: 0.75;
+    font-size: 0.88em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.stx-tweak-ok {
+    color: #66bb6a;
+    padding: 0 10px;
+}
+
+.stx-tag {
+    font-size: 0.75em;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: rgba(255, 152, 0, 0.22);
+    white-space: nowrap;
+}
+
+.stx-code {
+    margin: 4px 0;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--black50a, rgba(0, 0, 0, 0.5));
+    border: 1px solid var(--SmartThemeBorderColor);
+    font-family: var(--monoFontFamily, monospace);
+    font-size: 0.82em;
+    white-space: pre-wrap;
+    word-break: break-all;
+    user-select: all;
+}
+
+.stx-diag {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: min(420px, 80vw);
+}
+
+.stx-diag-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--SmartThemeBorderColor);
+}
+
+.stx-diag-row b {
+    text-align: right;
+    font-weight: 600;
+}
