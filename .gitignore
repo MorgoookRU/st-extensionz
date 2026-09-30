@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+android/build-inputs/
+android/keystore.jks
+android/.gradle/
+android/app/build/
+android/build/

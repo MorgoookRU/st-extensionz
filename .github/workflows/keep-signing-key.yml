@@ -18,4 +18,5 @@ jobs:
           path: android/keystore.jks
           key: apk-signing-key-v1
       - name: Report
-        run: echo "Signing key present: ${{ steps.cache.outputs.cache-hit == 'true' }}"
+        run: |
+          echo "Signing key present - ${{ steps.cache.outputs.cache-hit == 'true' }}"
